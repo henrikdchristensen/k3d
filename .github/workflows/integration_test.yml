@@ -92,11 +92,6 @@ jobs:
         kubectl get ingress -A
         kubectl get svc -A
     
-    - name: Debug Service and Gateway
-      run: |
-        kubectl describe virtualservice project-virtualservice -n project
-        kubectl logs -l app=istio-ingressgateway -n istio-system
-    
     - name: Test Istio Gateway
       run: |
         curl -v service-user.project.svc.cluster.local
