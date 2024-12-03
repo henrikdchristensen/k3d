@@ -12,7 +12,7 @@ spec:
         command: ["sh", "-c"]
         args:
           - |
-            pip install requests &&
+            pip install --no-cache-dir -r requirements.txt &&
             python -c "
             import requests;
             try:
@@ -24,9 +24,5 @@ spec:
             except Exception as e:
                 print(f'Error connecting to user service: {e}')
             "
-        resources:
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
       restartPolicy: Never
   backoffLimit: 1
