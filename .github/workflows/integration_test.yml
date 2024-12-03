@@ -92,19 +92,13 @@ jobs:
         kubectl get ingress -A
         kubectl get svc -A
     
-    # Get Istio Gateway External IP
-    - name: Get Istio Ingress Gateway External IP
-      id: get-ingress-ip
+    # Port forward Istio Ingress Gateway
+    - name: Port Forward Ingress Gateway
       run: |
-        EXTERNAL_IP=""
-        while [ -z "$EXTERNAL_IP" ]; do
-          echo "Waiting for external IP..."
-          EXTERNAL_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-          [ -z "$EXTERNAL_IP" ] && sleep 5
-        done
-        echo "::set-output name=external_ip::$EXTERNAL_IP"
+        kubectl port-forward -n istio-system svc/istio-ingressgateway 8085:80 &
+        sleep 5
 
     # Call the Service via Istio Gateway
     - name: Call Service via Istio Gateway
       run: |
-        curl -v http://${{ steps.get-ingress-ip.outputs.external_ip }}/user
+        curl -v http://localhost:8085/user
