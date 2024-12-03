@@ -41,7 +41,15 @@ jobs:
         K3D_NETWORK=$(docker network ls | grep k3d-my-cluster | awk '{print $2}')
         docker run -d --name yugabyte --network $K3D_NETWORK -p5433:5433 \
           yugabytedb/yugabyte:2.23.1.0-b220 bin/yugabyted start --background=false
-
+    
+    # Deploy Kubernetes manifests
+    - name: Apply Kubernetes Manifests
+      if: success()
+      run: |
+        kubectl create namespace project
+        kubectl config set-context --current --namespace=project
+        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
+    
     # Install Istio
     - name: Install Istio
       run: |
@@ -68,14 +76,6 @@ jobs:
         k3d image import comp:latest -c my-cluster
         k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
-    
-    # Deploy Kubernetes manifests
-    - name: Apply Kubernetes Manifests
-      if: success()
-      run: |
-        kubectl create namespace project
-        kubectl config set-context --current --namespace=project
-        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
     
     # Install Python dependencies for database initialization
     - name: Install Python Dependencies for Database
