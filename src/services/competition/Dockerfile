@@ -14,7 +14,6 @@ ENV PYTHONIOENCODING=UTF-8
 
 # Copy the rest of the code
 COPY . .
-EXPOSE 8080
 
 # Run the app
-CMD [ "python3", "app.py", "-u"]
+CMD ["python3", "app.py"]
