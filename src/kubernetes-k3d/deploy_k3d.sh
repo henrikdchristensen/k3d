@@ -55,7 +55,7 @@ echo "Downloading and installing Istio..."
 curl -L https://istio.io/downloadIstio | sh -
 ISTIO_DIR=$(find $PWD -type d -name "istio-*" -print -quit)
 export PATH=$ISTIO_DIR/bin:$PATH
-istioctl install --set profile=demo -y
+istioctl install --set profile=default -y
 
 # Label namespace for Istio injection
 kubectl label namespace project istio-injection=enabled

@@ -9,15 +9,11 @@ on:
       - master
 
 jobs:
-  
   integration-test:
-    
     name: Integration Test
-
     runs-on: ubuntu-latest
 
     steps:
-    
     # Checkout code
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -34,7 +30,7 @@ jobs:
     - name: Create K3D Cluster
       run: |
         k3d cluster create my-cluster \
-          --agents 4 \
+          --agents 3 \
           --k3s-arg "--disable=traefik@server:0" \
           --port 80:80@loadbalancer --port 443:443@loadbalancer
 
@@ -58,7 +54,11 @@ jobs:
         curl -L https://istio.io/downloadIstio | sh -
         ISTIO_DIR=$(find $PWD -type d -name "istio-*" -print -quit)
         export PATH=$ISTIO_DIR/bin:$PATH
-        istioctl install --set profile=demo -y
+        istioctl install --set profile=default -y
+
+    # Label namespace for Istio injection
+    - name: Label Namespace for Istio Injection
+      run: |
         kubectl label namespace project istio-injection=enabled
 
     # Build Docker images
@@ -67,7 +67,6 @@ jobs:
         docker build -t comp:latest ./src/services/competition
         docker build -t ctf:latest ./src/services/ctf
         docker build -t user:latest ./src/services/user
-        docker build -t main-test:latest ./src/main
     
     # Import Docker images into K3D
     - name: Import Docker Images into K3D
@@ -75,7 +74,6 @@ jobs:
         k3d image import comp:latest -c my-cluster
         k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
-        k3d image import main-test:latest -c my-cluster
       
     # Initialize Database
     - name: Initialize Database
@@ -91,41 +89,10 @@ jobs:
         kubectl get services -A
         kubectl get ingress -A
         kubectl get svc -A
-    
-    # Deploy a test job
-    - name: Deploy Test Job
-      run: |
-        kubectl apply -f ./src/main/tests-job.yaml
 
-    # Wait for the test job to complete
-    - name: Wait for Test Job
+    # Run Tests
+    - name: Run Tests
       run: |
-        kubectl wait --for=condition=complete job/tests-job -n project --timeout=120s || true
-
-    # Check the status of the Job
-    - name: Check Job Status
-      run: |
-        echo "Fetching details about the job..."
-        kubectl describe job tests-job -n project || echo "Failed to describe job"
-
-    # Check the status of associated Pods
-    - name: Check Pod Logs
-      run: |
-        echo "Fetching pod logs..."
-        POD_NAME=$(kubectl get pods -n project --selector=job-name=tests-job --output=jsonpath='{.items[0].metadata.name}')
-        kubectl logs $POD_NAME -n project > test-logs.txt || echo "Failed to fetch logs"
-
-    # Debugging pod states
-    - name: Debug Pod States
-      run: |
-        echo "Fetching pod statuses..."
-        kubectl get pods -n project --selector=job-name=tests-job
-        echo "Describing pod..."
-        kubectl describe pod -n project $POD_NAME || echo "Failed to describe pod"
-
-    # Upload logs as an artifact
-    - name: Upload Test Logs
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-logs
-        path: test-logs.txt
+        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
+        coverage run -m pytest ./src/main/tests -v -s
+        coverage report -m || echo "No coverage data for $service"
