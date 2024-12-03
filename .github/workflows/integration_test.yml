@@ -100,7 +100,8 @@ jobs:
     - name: Run Tests
       run: |
         pip install --no-cache-dir -r ./src/main/tests/requirements.txt
-        pytest ./src/main/tests --junitxml=test-results.xml
+        coverage run -m pytest ./src/main/tests -v -s
+        coverage report -m || echo "No coverage data for $service"
 
     # Upload Test Results
     - name: Upload Test Results
