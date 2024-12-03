@@ -42,7 +42,7 @@ jobs:
           yugabytedb/yugabyte:2.23.1.0-b220 bin/yugabyted start --background=false
     
 
-    # Deploy Kubernetes manifests
+    # Create Kubernetes Namespace
     - name: Create Kubernetes Namespace
       run: |
         kubectl create namespace project
@@ -65,21 +65,21 @@ jobs:
     # Build Docker images
     - name: Build Docker Images
       run: |
-        # docker build -t comp:latest ./src/services/competition
-        # docker build -t ctf:latest ./src/services/ctf
+        docker build -t comp:latest ./src/services/competition
+        docker build -t ctf:latest ./src/services/ctf
         docker build -t user:latest ./src/services/user
         # docker build -t main-test:latest ./src/main
     
     # Import Docker images into K3D
     - name: Import Docker Images into K3D
       run: |
-        # k3d image import comp:latest -c my-cluster
-        # k3d image import ctf:latest -c my-cluster
+        k3d image import comp:latest -c my-cluster
+        k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
-        # k3d image import main-test:latest -c my-cluster
+        k3d image import main-test:latest -c my-cluster
       
-    # Initialize Database
-    - name: Initialize Database
+    # Initialize Database with fake data
+    - name: Initialize Database with fake data
       run: |
         pip install --no-cache-dir -r ./src/database/requirements.txt
         python ./src/database/create_tables.py
@@ -93,8 +93,9 @@ jobs:
         kubectl get ingress -A
         kubectl get svc -A
     
-    - name: Test Istio Gateway
+    # Run Integration Tests
+    - name: Run Integration Tests
       run: |
-        curl -v http://localhost/user || true
-    
-    #TODO: Add Python tests here!
+        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
+        coverage run -m pytest ./src/main/tests -v -s
+        coverage report -m || echo "No coverage data"
