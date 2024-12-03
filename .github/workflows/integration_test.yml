@@ -44,7 +44,6 @@ jobs:
     
     # Deploy Kubernetes manifests
     - name: Apply Kubernetes Manifests
-      if: success()
       run: |
         kubectl create namespace project
         kubectl config set-context --current --namespace=project
@@ -77,15 +76,15 @@ jobs:
         k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
     
-    # Install Python dependencies for database initialization
-    - name: Install Python Dependencies for Database
+    # Install Python and Pip
+    - name: Install Python and Pip
       run: |
         sudo apt-get install -y python3 python3-pip
-        pip install --no-cache-dir -r ./src/database/requirements.txt
-
+      
     # Initialize Database
     - name: Initialize Database
       run: |
+        pip install --no-cache-dir -r ./src/database/requirements.txt
         python ./src/database/create_tables.py
         python ./src/database/fake_data.py
     
@@ -97,14 +96,10 @@ jobs:
         kubectl get ingress -A
         kubectl get svc -A
 
-    # Install Python dependencies for testing
-    - name: Install Python Dependencies for Testing
-      run: |
-        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
-
     # Run Tests
     - name: Run Tests
       run: |
+        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
         pytest ./src/main/tests --junitxml=test-results.xml
 
     # Upload Test Results
