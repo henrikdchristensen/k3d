@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: python:3.12
+        image: python:3.10
         command: ["sh", "-c"]
         args:
           - |
