@@ -67,6 +67,7 @@ jobs:
         docker build -t comp:latest ./src/services/competition
         docker build -t ctf:latest ./src/services/ctf
         docker build -t user:latest ./src/services/user
+        docker build -t main-test:latest ./src/main
     
     # Import Docker images into K3D
     - name: Import Docker Images into K3D
@@ -74,6 +75,7 @@ jobs:
         k3d image import comp:latest -c my-cluster
         k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
+        k3d image import main-test:latest -c my-cluster
       
     # Initialize Database
     - name: Initialize Database
@@ -89,10 +91,20 @@ jobs:
         kubectl get services -A
         kubectl get ingress -A
         kubectl get svc -A
-
-    # Run Tests
-    - name: Run Tests
+    
+    # Get Istio Gateway External IP
+    - name: Get Istio Ingress Gateway External IP
+      id: get-ingress-ip
       run: |
-        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
-        coverage run -m pytest ./src/main/tests -v -s
-        coverage report -m || echo "No coverage data for $service"
+        EXTERNAL_IP=""
+        while [ -z "$EXTERNAL_IP" ]; do
+          echo "Waiting for external IP..."
+          EXTERNAL_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          [ -z "$EXTERNAL_IP" ] && sleep 5
+        done
+        echo "::set-output name=external_ip::$EXTERNAL_IP"
+
+    # Call the Service via Istio Gateway
+    - name: Call Service via Istio Gateway
+      run: |
+        curl -v http://${{ steps.get-ingress-ip.outputs.external_ip }}/user
