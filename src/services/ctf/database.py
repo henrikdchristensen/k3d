@@ -16,11 +16,10 @@ def connect():
     #TODO_HC
     if os.getenv("KUBERNETES_MODE") == "in-cluster":
         conn = psycopg2.connect(
-            host="localhost",
+            # Default to Yugabyte defaults
+            host="yugabyte",
             port="5433",
-            database="yugabyte",
             user="yugabyte",
-            password="yugabyte",
             connect_timeout=10,
         )
         # conn = psycopg2.connect(
@@ -35,11 +34,10 @@ def connect():
         # )
     else:
         conn = psycopg2.connect(
-            host="localhost",
+            # Default to Yugabyte defaults
+            host="yugabyte",
             port="5433",
-            database="yugabyte",
             user="yugabyte",
-            password="yugabyte",
             connect_timeout=10,
         )
     return conn

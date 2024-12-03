@@ -19,7 +19,7 @@ print(f"Kubernetes mode: {mode}")
 
 app = Flask(__name__)
 
-# CORS(app)
+CORS(app)
 
 scheduler = APScheduler()
 def read_secret(secret_name):

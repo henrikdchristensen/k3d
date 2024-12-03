@@ -30,7 +30,7 @@ from utils import get_challenges, authorize, validate_json_fields
 
 app = Flask(__name__)
 
-# CORS(app)
+CORS(app)
 
 def read_secret(secret_name):
     with open(f"/var/secrets/{secret_name}.txt", "r") as f:

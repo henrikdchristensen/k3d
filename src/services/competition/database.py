@@ -14,11 +14,9 @@ def connect():
     if os.getenv("KUBERNETES_MODE") == "in-cluster":
         conn = psycopg2.connect(
             # Default to Yugabyte defaults
-            host="localhost",
-            port=os.getenv("DB_PORT", "5433"),
-            database=os.getenv("DB_NAME", "yugabyte"),
-            user=os.getenv("DB_USER", "yugabyte"),
-            password=os.getenv("DB_PW", "yugabyte"),
+            host="yugabyte",
+            port="5433",
+            user="yugabyte",
             connect_timeout=10,
         )
         # conn = psycopg2.connect(
@@ -35,11 +33,9 @@ def connect():
         #TODO_HC
         conn = psycopg2.connect(
             # Default to Yugabyte defaults
-            host="localhost",
-            port=os.getenv("DB_PORT", "5433"),
-            database=os.getenv("DB_NAME", "yugabyte"),
-            user=os.getenv("DB_USER", "yugabyte"),
-            password=os.getenv("DB_PW", "yugabyte"),
+            host="yugabyte",
+            port="5433",
+            user="yugabyte",
             connect_timeout=10,
         )
     return conn
