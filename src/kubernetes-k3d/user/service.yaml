@@ -4,11 +4,10 @@ metadata:
   name: service-user
   namespace: project
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: user
   ports:
   - port: 80
     protocol: TCP
     targetPort: 8082
-    nodePort: 30082

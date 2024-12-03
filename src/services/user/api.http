@@ -1,4 +1,4 @@
-@base_url = http://localhost:8082
+@base_url = http://localhost/user
 @username = testuser22
 @admin_username = admin1
 @admin_password = pass123

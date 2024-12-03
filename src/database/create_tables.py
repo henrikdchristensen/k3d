@@ -1,5 +1,7 @@
 import psycopg2
 import psycopg2.extras
+from psycopg2 import OperationalError
+import time
 from config import DB_CONFIG
 
 # Create table queries (dependencies respected)
@@ -69,18 +71,33 @@ CREATE_TABLE_QUERIES = [
 ]
 
 def create_tables():
-    """Create tables."""
-    conn = psycopg2.connect(**DB_CONFIG)
-    cursor = conn.cursor()
-    try:
-        cursor.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
-        for query in CREATE_TABLE_QUERIES:
-            cursor.execute(query)
-            print(f"Created table: {query.strip()}")
-        conn.commit()
-    finally:
-        cursor.close()
-        conn.close()
+    """Create tables with retry logic."""
+    retries = 5
+    delay = 5  # seconds
+
+    while retries > 0:
+        try:
+            conn = psycopg2.connect(**DB_CONFIG)
+            cursor = conn.cursor()
+            try:
+                cursor.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
+                for query in CREATE_TABLE_QUERIES:
+                    cursor.execute(query)
+                    print(f"Created table: {query.strip()[:50]}...")  # Print first 50 chars of query
+                conn.commit()
+                print("All tables created successfully.")
+                break  # Exit the loop if successful
+            finally:
+                cursor.close()
+                conn.close()
+        except OperationalError as e:
+            retries -= 1
+            print(f"Failed to connect to the database. Retries left: {retries}")
+            print(f"Error: {e}")
+            if retries == 0:
+                print("Max retries reached. Exiting.")
+                raise
+            time.sleep(delay)  # Wait before retrying
 
 if __name__ == "__main__":
     create_tables()

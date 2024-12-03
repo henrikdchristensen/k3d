@@ -4,11 +4,10 @@ metadata:
   name: service-comp
   namespace: project
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: comp
   ports:
   - port: 80
     protocol: TCP
     targetPort: 8080
-    nodePort: 30080

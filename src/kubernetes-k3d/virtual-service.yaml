@@ -1,0 +1,41 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: project-virtualservice
+  namespace: project
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - project-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /comp
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-comp.project.svc.cluster.local
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: /ctf
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-ctf.project.svc.cluster.local
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: /user
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: service-user.project.svc.cluster.local
+        port:
+          number: 80

@@ -11,9 +11,8 @@ curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 echo "Creating K3D cluster with 3 nodes..."
 k3d cluster create my-cluster \
     --agents 3 \
-    --port "8080:30080@agent:0" \
-    --port "8081:30081@agent:1" \
-    --port "8082:30082@agent:2"
+    --k3s-arg "--disable=traefik@server:0" \
+    --port 80:80@loadbalancer --port 443:443@loadbalancer
 
 # Get the K3D Docker network name
 K3D_NETWORK=$(docker network ls | grep k3d-my-cluster | awk '{print $2}')
@@ -38,10 +37,6 @@ source ./src/database/venv/bin/activate
 echo "Installing Python dependencies..."
 pip install --no-cache-dir -r ./src/database/requirements.txt
 
-echo "Waiting for 10 seconds to allow database to start..."
-sleep 10
-echo "Done waiting!"
-
 # Run database initialization script
 echo "Initializing database schema..."
 python ./src/database/create_tables.py
@@ -54,6 +49,16 @@ deactivate
 # Create a namespace for the deployment
 kubectl create namespace project
 kubectl config set-context --current --namespace=project
+
+# Install Istio
+echo "Downloading and installing Istio..."
+curl -L https://istio.io/downloadIstio | sh -
+ISTIO_DIR=$(find $PWD -type d -name "istio-*" -print -quit)
+export PATH=$ISTIO_DIR/bin:$PATH
+istioctl install --set profile=demo -y
+
+# Label namespace for Istio injection
+kubectl label namespace project istio-injection=enabled
 
 # Build Docker images for each service
 echo "Building Docker images..."

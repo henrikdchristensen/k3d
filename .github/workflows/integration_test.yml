@@ -1,0 +1,98 @@
+name: Deploy K3D Cluster with Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Install Docker and Kubernetes dependencies
+    - name: Set up Docker and K3D
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl
+        curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+    # Create K3D cluster
+    - name: Create K3D Cluster
+      run: |
+        k3d cluster create my-cluster \
+          --agents 3 \
+          --k3s-arg "--disable=traefik@server:0" \
+          --port 80:80@loadbalancer --port 443:443@loadbalancer
+
+    # Build Docker images
+    - name: Build Docker Images
+      run: |
+        docker build -t comp:latest ./src/services/competition
+        docker build -t ctf:latest ./src/services/ctf
+        docker build -t user:latest ./src/services/user
+
+    # Import Docker images into K3D
+    - name: Import Docker Images into K3D
+      run: |
+        k3d image import comp:latest -c my-cluster
+        k3d image import ctf:latest -c my-cluster
+        k3d image import user:latest -c my-cluster
+
+    # Run YugabyteDB
+    - name: Run YugabyteDB
+      run: |
+        K3D_NETWORK=$(docker network ls | grep k3d-my-cluster | awk '{print $2}')
+        docker run -d --name yugabyte --network $K3D_NETWORK -p5433:5433 \
+          yugabytedb/yugabyte:2.23.1.0-b220 bin/yugabyted start --background=false
+
+    # Install Python dependencies globally
+    - name: Install Python Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip
+        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
+
+    # Run Tests
+    - name: Run Tests
+      run: |
+        pytest ./src/main/tests --junitxml=test-results.xml
+
+    # Upload Test Results
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: test-results.xml
+
+    # Deploy Kubernetes manifests
+    - name: Apply Kubernetes Manifests
+      if: success()
+      run: |
+        kubectl create namespace project
+        kubectl config set-context --current --namespace=project
+        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
+
+    # Verify Deployment
+    - name: Verify Deployment
+      run: |
+        kubectl get pods -A
+        kubectl get services -A
+        kubectl get ingress -A
+        kubectl get svc -A
+
+    
+    # Cleanup K3D cluster
+    - name: Cleanup K3D Cluster
+      if: always()
+      run: k3d cluster delete my-cluster

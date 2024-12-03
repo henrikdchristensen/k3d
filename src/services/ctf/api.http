@@ -1,5 +1,5 @@
-@base_url = http://localhost:8081
-@base_url_user = http://localhost:8082
+@base_url = http://localhost/ctf
+@base_url_user = http://localhost/user
 @challenge_id = b93327a9-ef95-4844-95f2-afa7d8fd9192
 @competition_id = 8f378f18-2988-4fa4-8c0e-53b84dc3cb18
 @JWT-developer = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMjkyMDg5OCwianRpIjoiZWU1NzdmZWEtM2VjNy00NTRmLWEwYjMtNmU0YjI5OTBiMTk0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im55dGVzdDEiLCJuYmYiOjE3MzI5MjA4OTgsImNzcmYiOiI4OTQyMDhhMy1hODM0LTQ4OWQtYmYyMC01YWVhZThjMjEwMzAiLCJleHAiOjE3MzI5MjQ0OTgsInJvbGUiOiJkZXZlbG9wZXIifQ.OGFH1_sM6f46GmCjX0A7rsB_3trukVgJ5gR5sl067II

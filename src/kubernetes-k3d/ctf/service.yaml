@@ -4,11 +4,10 @@ metadata:
   name: service-ctf
   namespace: project
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: ctf
   ports:
   - port: 80
     protocol: TCP
     targetPort: 8081
-    nodePort: 30081
