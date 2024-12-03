@@ -96,7 +96,7 @@ jobs:
     - name: Test Job
       run: |
         kubectl apply -f ./src/main/tests/test-job.yaml
-        kubectl wait --for=condition=complete job/test-comm -n project
+        kubectl wait --for=condition=complete job/test-comm -n project --timeout=60s
         kubectl logs job/test-comm -n project
         
     # # Run Tests

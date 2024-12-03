@@ -12,27 +12,21 @@ spec:
         command: ["sh", "-c"]
         args:
           - |
-            echo "Installing Python dependencies..." &&
             pip install requests &&
-            echo "Testing connectivity to service-user..." &&
             python -c "
-            import requests
+            import requests;
             try:
-                print('Connecting to http://service-user.project.svc.cluster.local')
-                response = requests.get('http://service-user.project.svc.cluster.local')
+                response = requests.get('http://service-user.project.svc.cluster.local');
                 if response.status_code == 200:
-                    print('SUCCESS: User service is reachable. Response:', response.text)
-                    exit(0)
+                    print('User service reachable:', response.text)
                 else:
-                    print(f'FAILURE: Service responded with status code: {response.status_code}')
-                    exit(1)
+                    print(f'Failed with status code: {response.status_code}')
             except Exception as e:
-                print(f'ERROR: Unable to connect to the user service. Exception: {e}')
-                exit(1)
+                print(f'Error connecting to user service: {e}')
             "
         resources:
           limits:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "500m"
       restartPolicy: Never
-  backoffLimit: 0
+  backoffLimit: 1
