@@ -1,6 +1,6 @@
 import requests
 
 def test_comm():
-    # Request user service via http
-    response = requests.get('http://localhost/user')
+    # Use the Kubernetes DNS name for the user service
+    response = requests.get('http://service-user.project.svc.cluster.local/user')
     assert response.status_code == 200
