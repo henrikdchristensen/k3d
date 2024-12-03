@@ -99,7 +99,7 @@ jobs:
     # Deploy a test job
     - name: Deploy Test Job
       run: |
-        kubectl apply -f .src/main/tests/test-job.yaml
+        kubectl apply -f ./src/main/tests/test-job.yaml
 
     # Wait for the test job to complete
     - name: Wait for Test Job
