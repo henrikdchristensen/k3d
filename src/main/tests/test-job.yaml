@@ -14,7 +14,7 @@ spec:
         - |
           import requests
           try:
-              response = requests.get('http://service-user.project.svc.cluster.local/user')
+              response = requests.get('http://service-user.project.svc.cluster.local')
               if response.status_code == 200:
                   print("User service is reachable: ", response.text)
               else:
