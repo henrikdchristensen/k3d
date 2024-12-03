@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comp-deployment
+  namespace: project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: comp-deployment
+      app: comp
+  template:
+    metadata:
+      labels:
+        deployment: comp-deployment
+        app: comp
+    spec:
+      containers:
+      - image: comp:latest
+        name: comp
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080

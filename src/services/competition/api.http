@@ -1,0 +1,181 @@
+@base_url = http://localhost:8080
+@username = testuser22
+@admin_username = admin1
+@admin_password = pass123
+@password = testpassword2
+@email = test@email.com
+@role = user
+@username = 1
+@test_user = 7c5a4297-ad59-4e0d-aa55-d4b48bb59429
+@competition_id = 8f378f18-2988-4fa4-8c0e-53b84dc3cb18
+@challenge_id = 3253d3a4-7a7b-4a54-9316-29b892495b4e
+@JWT-developer = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMzAxNTE5NCwianRpIjoiNjc0NDA5NTUtYzE3MC00YzE2LTlmNmEtM2QxMjg5ZjFjY2ZlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im55dGVzdDEiLCJuYmYiOjE3MzMwMTUxOTQsImNzcmYiOiI1MmJlMmNlYy01YTdiLTQ2NWQtYTJkMi0xY2IyY2MyYjg0MmMiLCJleHAiOjE3MzMwMTg3OTQsInJvbGUiOiJkZXZlbG9wZXIifQ.aaAuctD1LsSU9PGiPJ-tt6AfAl2r5erS37GXCMW-FSo
+@JWT-admin = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMzA4NTAwMywianRpIjoiYTY1OTYzMzktMjgxZS00MWZkLTkxZTYtZTFiMWZkZDE3NTQ3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluMSIsIm5iZiI6MTczMzA4NTAwMywiY3NyZiI6IjY3NTgxZmRmLWFlMzItNDBlZS05ZDdkLThlNzVlYjA0Yzc1ZSIsImV4cCI6MTczMzA4ODYwMywicm9sZSI6ImFkbWluIn0.UWs1og1GVR-Ane3JdzgzzHqOQ0sPiAloqfSzXZYiSo0
+@JWT-user = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMzAxNjU1NSwianRpIjoiMmQxMjkwMWQtNzczNy00YzQyLWJmNTgtMTM0NWQyODZhMDdkIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InRlc3RicnVnZXIiLCJuYmYiOjE3MzMwMTY1NTUsImNzcmYiOiJlMTQ1Njk2YS0xODZmLTQwZmUtOTI0My1lNmYwYmEwN2RiMmUiLCJleHAiOjE3MzMwMjAxNTUsInJvbGUiOiJ1c2VyIn0.186OfmRJqT42BrfCUuKjO5IaNn3MgrcIoYdZiXDNH30
+
+# @name loginUser
+POST http://35.217.9.31/user-service/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "testbruger",
+    "password": "changeme"
+}
+###
+
+# @name loginDeveloper
+POST http://35.217.9.31/user-service/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "nytest1",
+    "password": "ligegyldigt"
+}
+###
+
+# @name loginAdmin
+POST http://35.217.9.31/user-service/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "admin1",
+    "password": "pass123"
+}
+###
+
+# @name getCompetitions
+GET {{base_url}}/competitions HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+###
+
+# @name getCompetitionById
+GET {{base_url}}/competitions/{{competition_id}} HTTP/1.1
+
+###
+
+# @name getCompetitionsActive
+GET {{base_url}}/competitions/active HTTP/1.1
+###
+
+#TODO: should token be admin or...?
+# @name createCompetition
+POST {{base_url}}/competitions HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+Content-Type: application/json
+
+{
+    "name": "test competition",
+    "active": "True"
+}
+###
+
+#TODO: should token be admin or...?
+# @name addParticipant
+POST {{base_url}}/participants HTTP/1.1
+Authorization: Bearer {{JWT-user}}
+Content-Type: application/json
+
+{
+    "competition_id": "{{competition_id}}"
+}
+###
+
+#TODO: should token be admin or...?
+# @name getParticipantByUsername
+GET {{base_url}}/participants/{{test_user}} HTTP/1.1
+###
+
+# @name getParticipants
+GET {{base_url}}/participants HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+###
+
+# @name getParticipantsByCompetitionId
+GET {{base_url}}/participants/{{competition_id}} HTTP/1.1
+###
+
+# @name getLeaderboards
+GET {{base_url}}/leaderboards HTTP/1.1
+###
+
+#TODO: should token be admin or...?
+# @name deleteSubmissions
+DELETE {{base_url}}/submissions HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+Content-Type: application/json
+
+{
+    "competition_id": "{{competition_id}}"
+}
+###
+
+# @name getLeaderboardByCompetitionId
+#TODO: in userscores we only have challenge_id, not competition_id
+GET {{base_url}}/leaderboards/{{competition_id}} HTTP/1.1
+###
+
+#TODO: should token be admin or...?
+# @name resetLeaderboardByCompetitionId
+#TODO: in userscores we only have challenge_id, not competition_id
+DELETE {{base_url}}/leaderboards/{{competition_id}} HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+###
+
+#TODO: should token be admin or...?
+# @name updateScore
+PUT {{base_url}}/update-score HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+Content-Type: application/json
+
+{
+    "competition_id": "{{competition_id}}",
+    "new_score": 100
+}
+###
+
+# @name addChallenge
+POST {{base_url}}/add-challenge HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+Content-Type: application/json
+
+{
+    "competition_id": "{{competition_id}}",
+    "challenge_id": "{{challenge_id}}"
+}
+###
+
+# @name getSubmissions
+GET {{base_url}}/submissions HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+###
+
+# @name getSubmissionsByChallenge
+GET {{base_url}}/submissions/challenges/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+###
+
+#TODO: Test this
+# @name submitFlag
+POST {{base_url}}/submit HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+Content-Type: application/json
+
+{
+    "competition_id": "{{competition_id}}",
+    "challenge_id": "{{challenge_id}}",
+    "flag": "test_flag" 
+}
+###
+
+
+# @name UpdateCompetition
+PUt {{base_url}}/competitions/996794e4-c58b-4259-862d-6ac4d20ed194 HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+Content-Type: application/json
+
+{
+    "name": "User-centric optimizing model2",
+    "active": false
+}
+
+###

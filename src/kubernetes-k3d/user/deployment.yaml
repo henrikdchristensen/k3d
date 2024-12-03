@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+  namespace: project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: user-deployment
+      app: user
+  template:
+    metadata:
+      labels:
+        deployment: user-deployment
+        app: user
+    spec:
+      containers:
+      - image: user:latest
+        name: user
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8082

@@ -1,0 +1,164 @@
+@base_url = http://localhost:8081
+@base_url_user = http://localhost:8082
+@challenge_id = b93327a9-ef95-4844-95f2-afa7d8fd9192
+@competition_id = 8f378f18-2988-4fa4-8c0e-53b84dc3cb18
+@JWT-developer = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMjkyMDg5OCwianRpIjoiZWU1NzdmZWEtM2VjNy00NTRmLWEwYjMtNmU0YjI5OTBiMTk0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im55dGVzdDEiLCJuYmYiOjE3MzI5MjA4OTgsImNzcmYiOiI4OTQyMDhhMy1hODM0LTQ4OWQtYmYyMC01YWVhZThjMjEwMzAiLCJleHAiOjE3MzI5MjQ0OTgsInJvbGUiOiJkZXZlbG9wZXIifQ.OGFH1_sM6f46GmCjX0A7rsB_3trukVgJ5gR5sl067II
+@JWT-admin = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMzAwOTkxMSwianRpIjoiYzZlY2NjYzItNTgyMS00MTRkLTkyMDgtNjU0NDg1OTQ4MmYxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluMSIsIm5iZiI6MTczMzAwOTkxMSwiY3NyZiI6ImQ0NTllMDk2LTM1NDAtNGI4NC04OThhLTcxZTA5NmQxMGRjYyIsImV4cCI6MTczMzAxMzUxMSwicm9sZSI6ImFkbWluIn0.zUCnMybA1CrTToii1A1pIYUgzwJmP3PMMSQEDx4H2yM
+# If you get a return message about an expired token, you need to get a new one by calling the login method of user.
+# You can do that in the user/api.htttp file. You then copy paste the given string as your new jwt.
+# if you get a problem about missing authorization header, you need to add "Authorization: Bearer {{JWT}}" jsut below the endpoint call itself.
+
+# @name loginDeveloper
+POST {{base_url_user}}/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "nytest1",
+    "password": "ligegyldigt"
+}
+###
+
+# @name loginAdmin
+POST {{base_url_user}}/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "admin1",
+    "password": "pass123"
+}
+###
+
+# @name getChallenges
+GET {{base_url}}/challenges HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+###
+
+# @name getChallengeById
+GET {{base_url}}/challenges/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+###
+
+# @name createChallenge
+POST {{base_url}}/challenges HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="challenge-example.yaml"
+Content-Type: application/x-yaml
+
+< ./challenge-example.yaml
+--boundary
+Content-Disposition: form-data; name="data"
+Content-Type: application/json
+
+{"image_url": "ghcr.io/knative/helloworld-go:latest"}
+--boundary--
+###
+
+# @name putChallenge
+PUT {{base_url}}/challenges/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="challenge-example.yaml"
+Content-Type: application/x-yaml
+
+< ./challenge-example.yaml
+--boundary
+Content-Disposition: form-data; name="data"
+Content-Type: application/json
+
+{"image_url": "random test string"}
+--boundary--
+###
+
+# @name patchChallenge
+PATCH {{base_url}}/challenges/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+Content-Type: application/json
+
+{"image_url": "ghcr.io/knative/helloworld-go:latest"}
+###
+
+# @name deleteChallenge
+DELETE {{base_url}}/challenges/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+###
+
+# @name openChallenge
+GET {{base_url}}/open/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+###
+
+# @name testChallenge
+GET {{base_url}}/test/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+###
+
+# @name closeChallenge
+GET {{base_url}}/close/{{challenge_id}} HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+###
+
+# @name evaluate
+POST {{base_url}}/evaluate HTTP/1.1
+Content-Type: application/json
+
+{
+    "challenge_id": "3b1f3347-cac8-4a45-adad-2c55176e11ad",
+    "flag": "test-flag" 
+}
+###
+
+# @name addCompetetion
+POST {{base_url}}/add-comp HTTP/1.1
+Authorization: Bearer {{JWT-developer}}
+Content-Type: application/json
+
+{
+    "competition_id": "{{competition_id}}",
+    "challenge_id": "3253d3a4-7a7b-4a54-9316-29b892495b4e"
+}
+###
+
+# @name getChallengesFromCompetitionId
+GET {{base_url}}/challenges/competitions/{{competition_id}} HTTP/1.1
+
+###
+
+# @name getChallengesFromCompetitionIdPostVersion
+POST {{base_url}}/challenges/competitions HTTP/1.1
+Content-Type: application/json
+
+{
+  "competition_ids": ["07e2eff2-3e43-4abb-b36e-8a724e37d846"]
+}
+###
+
+# @name getActiveChallenges
+GET {{base_url}}/challenges/active HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+Content-Type: application/json
+###
+
+
+# @name AddChallengesToComp
+
+post {{base_url}}/add-comp HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+Content-Type: application/json
+
+{
+    "competition_id": "07e2eff2-3e43-4abb-b36e-8a724e37d846",
+    "challenge_ids": ["b93327a9-ef95-4844-95f2-afa7d8fd9192"]
+}
+###
+
+
+# @name GetChallengesFromAuthor
+
+get {{base_url}}/challenges/Anders Sund HTTP/1.1
+Authorization: Bearer {{JWT-admin}}
+###

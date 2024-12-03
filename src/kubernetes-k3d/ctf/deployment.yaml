@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ctf-deployment
+  namespace: project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: ctf-deployment
+      app: ctf
+  template:
+    metadata:
+      labels:
+        deployment: ctf-deployment
+        app: ctf
+    spec:
+      containers:
+      - image: ctf:latest
+        name: ctf
+        imagePullPolicy: Never # restrict to local image
+        ports:
+        - containerPort: 8081

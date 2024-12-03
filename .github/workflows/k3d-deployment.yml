@@ -1,0 +1,61 @@
+name: Deploy to K3D
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Docker
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    # Step 3: Install K3D
+    - name: Install K3D
+      run: |
+        curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+    # Step 4: Create K3D Cluster with 3 nodes
+    - name: Create K3D cluster
+      run: |
+        k3d cluster create my-cluster \
+          --agents 3 \
+          --port "80:80@loadbalancer" \
+          --port "8080:8080@loadbalancer" \
+          --port "8081:8081@loadbalancer" \
+          --port "8082:8082@loadbalancer"
+
+    # Step 5: Build Docker images for each service
+    - name: Build and tag Docker images
+      run: |
+        docker build -t competition:latest ./src/services/competition
+        docker build -t ctf:latest ./src/services/ctf
+        docker build -t user:latest ./src/services/user
+
+    # Step 6: Import images into the K3D cluster
+    - name: Import Docker images into K3D
+      run: |
+        k3d image import competition:latest -c my-cluster
+        k3d image import ctf:latest -c my-cluster
+        k3d image import user:latest -c my-cluster
+
+    # Step 7: Deploy Kubernetes manifests
+    - name: Deploy services to Kubernetes
+      run: |
+        kubectl apply -f src/services/competition/kubernetes/
+        kubectl apply -f src/services/ctf/kubernetes/
+        kubectl apply -f src/services/user/kubernetes/
+
+    # Step 8: Verify the deployment
+    - name: Verify deployment
+      run: |
+        kubectl get pods -A
+        kubectl get services -A
