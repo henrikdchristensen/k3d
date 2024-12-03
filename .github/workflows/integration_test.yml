@@ -9,11 +9,15 @@ on:
       - master
 
 jobs:
+  
   integration-test:
+    
     name: Integration Test
+
     runs-on: ubuntu-latest
 
     steps:
+    
     # Checkout code
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -22,7 +26,6 @@ jobs:
     - name: Set up Docker and K3D
       run: |
         sudo apt-get update
-        sudo apt-get install -y curl
         curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
@@ -73,11 +76,6 @@ jobs:
         k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
         k3d image import main-test:latest -c my-cluster
-    
-    # Install Python and Pip
-    - name: Install Python and Pip
-      run: |
-        sudo apt-get install -y python3 python3-pip
       
     # Initialize Database
     - name: Initialize Database

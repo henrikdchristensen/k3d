@@ -3,8 +3,13 @@ kind: Job
 metadata:
   name: tests-job
   namespace: project
+  annotations:
+    sidecar.istio.io/inject: "false"
 spec:
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       containers:
       - name: test-container
