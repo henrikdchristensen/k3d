@@ -95,18 +95,32 @@ jobs:
         kubectl get services -A
         kubectl get ingress -A
         kubectl get svc -A
-
-    # Run Tests
-    - name: Run Tests
+    
+    # Deploy a test job
+    - name: Deploy Test Job
       run: |
-        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
-        coverage run -m pytest ./src/main/tests -v -s
-        coverage report -m || echo "No coverage data for $service"
+        kubectl apply -f test-job.yaml
 
-    # Upload Test Results
-    - name: Upload Test Results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: test-results.xml
+    # Wait for the test job to complete
+    - name: Wait for Test Job
+      run: |
+        kubectl wait --for=condition=complete job/test-comm -n project --timeout=120s
+
+    # Fetch logs from the test job
+    - name: Fetch Test Job Logs
+      run: |
+        kubectl logs job/test-comm -n project
+    # # Run Tests
+    # - name: Run Tests
+    #   run: |
+    #     pip install --no-cache-dir -r ./src/main/tests/requirements.txt
+    #     coverage run -m pytest ./src/main/tests -v -s
+    #     coverage report -m || echo "No coverage data for $service"
+
+    # # Upload Test Results
+    # - name: Upload Test Results
+    #   if: always()
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: test-results
+    #     path: test-results.xml
