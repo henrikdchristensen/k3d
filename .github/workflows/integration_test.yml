@@ -9,7 +9,8 @@ on:
       - master
 
 jobs:
-  deploy:
+  integration-test:
+    name: Integration Test
     runs-on: ubuntu-latest
 
     steps:
