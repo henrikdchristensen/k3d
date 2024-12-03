@@ -95,11 +95,35 @@ jobs:
         kubectl get svc -A
     
     # Deploy a test job
-    - name: Test Job
+    - name: Deploy Test Job
       run: |
         kubectl apply -f ./src/main/tests-job.yaml
-        kubectl wait --for=condition=complete job/tests-job -n project --timeout=60s || true
-        kubectl logs job/tests-job -n project > test-logs.txt || echo "Failed to fetch logs"
+
+    # Wait for the test job to complete
+    - name: Wait for Test Job
+      run: |
+        kubectl wait --for=condition=complete job/tests-job -n project --timeout=120s || true
+
+    # Check the status of the Job
+    - name: Check Job Status
+      run: |
+        echo "Fetching details about the job..."
+        kubectl describe job tests-job -n project || echo "Failed to describe job"
+
+    # Check the status of associated Pods
+    - name: Check Pod Logs
+      run: |
+        echo "Fetching pod logs..."
+        POD_NAME=$(kubectl get pods -n project --selector=job-name=tests-job --output=jsonpath='{.items[0].metadata.name}')
+        kubectl logs $POD_NAME -n project > test-logs.txt || echo "Failed to fetch logs"
+
+    # Debugging pod states
+    - name: Debug Pod States
+      run: |
+        echo "Fetching pod statuses..."
+        kubectl get pods -n project --selector=job-name=tests-job
+        echo "Describing pod..."
+        kubectl describe pod -n project $POD_NAME || echo "Failed to describe pod"
 
     # Upload logs as an artifact
     - name: Upload Test Logs
