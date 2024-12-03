@@ -34,20 +34,6 @@ jobs:
           --k3s-arg "--disable=traefik@server:0" \
           --port 80:80@loadbalancer --port 443:443@loadbalancer
 
-    # Build Docker images
-    - name: Build Docker Images
-      run: |
-        docker build -t comp:latest ./src/services/competition
-        docker build -t ctf:latest ./src/services/ctf
-        docker build -t user:latest ./src/services/user
-
-    # Import Docker images into K3D
-    - name: Import Docker Images into K3D
-      run: |
-        k3d image import comp:latest -c my-cluster
-        k3d image import ctf:latest -c my-cluster
-        k3d image import user:latest -c my-cluster
-
     # Run YugabyteDB
     - name: Run YugabyteDB
       run: |
@@ -55,11 +41,51 @@ jobs:
         docker run -d --name yugabyte --network $K3D_NETWORK -p5433:5433 \
           yugabytedb/yugabyte:2.23.1.0-b220 bin/yugabyted start --background=false
 
-    # Install Python dependencies globally
-    - name: Install Python Dependencies
+    # Build Docker images
+    - name: Build Docker Images
       run: |
-        sudo apt-get update
+        docker build -t comp:latest ./src/services/competition
+        docker build -t ctf:latest ./src/services/ctf
+        docker build -t user:latest ./src/services/user
+    
+    # Import Docker images into K3D
+    - name: Import Docker Images into K3D
+      run: |
+        k3d image import comp:latest -c my-cluster
+        k3d image import ctf:latest -c my-cluster
+        k3d image import user:latest -c my-cluster
+    
+    # Deploy Kubernetes manifests
+    - name: Apply Kubernetes Manifests
+      if: success()
+      run: |
+        kubectl create namespace project
+        kubectl config set-context --current --namespace=project
+        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
+    
+    # Install Python dependencies for database initialization
+    - name: Install Python Dependencies for Database
+      run: |
         sudo apt-get install -y python3 python3-pip
+        pip install --no-cache-dir -r ./src/database/requirements.txt
+
+    # Initialize Database
+    - name: Initialize Database
+      run: |
+        python ./src/database/create_tables.py
+        python ./src/database/fake_data.py
+    
+    # Verify Deployment
+    - name: Verify Deployment
+      run: |
+        kubectl get pods -A
+        kubectl get services -A
+        kubectl get ingress -A
+        kubectl get svc -A
+
+    # Install Python dependencies for testing
+    - name: Install Python Dependencies for Testing
+      run: |
         pip install --no-cache-dir -r ./src/main/tests/requirements.txt
 
     # Run Tests
@@ -74,25 +100,3 @@ jobs:
       with:
         name: test-results
         path: test-results.xml
-
-    # Deploy Kubernetes manifests
-    - name: Apply Kubernetes Manifests
-      if: success()
-      run: |
-        kubectl create namespace project
-        kubectl config set-context --current --namespace=project
-        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
-
-    # Verify Deployment
-    - name: Verify Deployment
-      run: |
-        kubectl get pods -A
-        kubectl get services -A
-        kubectl get ingress -A
-        kubectl get svc -A
-
-    
-    # Cleanup K3D cluster
-    - name: Cleanup K3D Cluster
-      if: always()
-      run: k3d cluster delete my-cluster
