@@ -41,13 +41,6 @@ jobs:
         docker run -d --name yugabyte --network $K3D_NETWORK -p5433:5433 \
           yugabytedb/yugabyte:2.23.1.0-b220 bin/yugabyted start --background=false
     
-    # Deploy Kubernetes manifests
-    - name: Apply Kubernetes Manifests
-      run: |
-        kubectl create namespace project
-        kubectl config set-context --current --namespace=project
-        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
-    
     # Install Istio
     - name: Install Istio
       run: |
@@ -60,7 +53,14 @@ jobs:
     - name: Label Namespace for Istio Injection
       run: |
         kubectl label namespace project istio-injection=enabled
-
+    
+    # Deploy Kubernetes manifests
+    - name: Apply Kubernetes Manifests
+      run: |
+        kubectl create namespace project
+        kubectl config set-context --current --namespace=project
+        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
+    
     # Build Docker images
     - name: Build Docker Images
       run: |
@@ -91,6 +91,12 @@ jobs:
         kubectl get services -A
         kubectl get ingress -A
         kubectl get svc -A
+    
+    - name: Debug Service and Gateway
+      run: |
+        kubectl describe gateway project-gateway -n project
+        kubectl describe virtualservice project-virtualservice -n project
+        kubectl logs -l app=istio-ingressgateway -n istio-system
     
     - name: Test Istio Gateway
       run: |
