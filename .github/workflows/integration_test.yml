@@ -94,7 +94,6 @@ jobs:
     
     - name: Debug Service and Gateway
       run: |
-        kubectl describe gateway project-gateway -n project
         kubectl describe virtualservice project-virtualservice -n project
         kubectl logs -l app=istio-ingressgateway -n istio-system
     
