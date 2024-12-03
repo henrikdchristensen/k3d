@@ -32,7 +32,7 @@ jobs:
         k3d cluster create my-cluster \
         --agents 3 \
         --k3s-arg "--disable=traefik@server:0" \
-        --port 30080:30080@loadbalancer \
+        --port 80:80@loadbalancer --port 443:443@loadbalancer
 
     # Run YugabyteDB
     - name: Run YugabyteDB
@@ -64,18 +64,18 @@ jobs:
     # Build Docker images
     - name: Build Docker Images
       run: |
-        docker build -t comp:latest ./src/services/competition
-        docker build -t ctf:latest ./src/services/ctf
+        # docker build -t comp:latest ./src/services/competition
+        # docker build -t ctf:latest ./src/services/ctf
         docker build -t user:latest ./src/services/user
-        docker build -t main-test:latest ./src/main
+        # docker build -t main-test:latest ./src/main
     
     # Import Docker images into K3D
     - name: Import Docker Images into K3D
       run: |
-        k3d image import comp:latest -c my-cluster
-        k3d image import ctf:latest -c my-cluster
+        # k3d image import comp:latest -c my-cluster
+        # k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
-        k3d image import main-test:latest -c my-cluster
+        # k3d image import main-test:latest -c my-cluster
       
     # Initialize Database
     - name: Initialize Database
@@ -92,13 +92,14 @@ jobs:
         kubectl get ingress -A
         kubectl get svc -A
     
-    # Port forward Istio Ingress Gateway
-    - name: Port Forward Ingress Gateway
+    - name: Debug Service and Gateway
       run: |
-        kubectl port-forward -n istio-system svc/istio-ingressgateway 8085:80 &
-        sleep 5
-
-    # Call the Service via Istio Gateway
-    - name: Call Service via Istio Gateway
+        kubectl describe gateway project-gateway -n project
+        kubectl describe virtualservice project-virtualservice -n project
+        kubectl logs -l app=istio-ingressgateway -n istio-system
+    
+    - name: Test Istio Gateway
       run: |
-        curl -v http://localhost:30080/user
+        curl -v service-user.project.svc.cluster.local
+        curl -v http://localhost:8082/user
+        curl -v http://localhost:80/user
