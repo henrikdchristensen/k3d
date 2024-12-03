@@ -30,9 +30,9 @@ jobs:
     - name: Create K3D Cluster
       run: |
         k3d cluster create my-cluster \
-          --agents 3 \
-          --k3s-arg "--disable=traefik@server:0" \
-          --port 80:80@loadbalancer --port 443:443@loadbalancer
+        --agents 3 \
+        --k3s-arg "--disable=traefik@server:0" \
+        --port 30080:30080@loadbalancer \
 
     # Run YugabyteDB
     - name: Run YugabyteDB
@@ -101,4 +101,4 @@ jobs:
     # Call the Service via Istio Gateway
     - name: Call Service via Istio Gateway
       run: |
-        curl -v http://localhost:8085/user
+        curl -v http://localhost:30080/user

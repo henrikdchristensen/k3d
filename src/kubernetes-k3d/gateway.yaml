@@ -1,15 +1,13 @@
-apiVersion: networking.istio.io/v1beta1
-kind: Gateway
+apiVersion: v1
+kind: Service
 metadata:
-  name: project-gateway
-  namespace: project
+  name: istio-ingressgateway
+  namespace: istio-system
 spec:
+  type: NodePort  # Change to LoadBalancer if running on a cloud provider
   selector:
-    istio: ingressgateway  # Use Istio's ingress gateway
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
+    app: istio-ingressgateway
+  ports:
+  - port: 80
+    targetPort: 8080
+    nodePort: 30080
