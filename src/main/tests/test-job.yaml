@@ -9,21 +9,24 @@ spec:
       containers:
       - name: test
         image: python:3.12
-        command: ["python", "-c"]
+        command: ["sh", "-c"]
         args:
-        - |
-          import requests
-          try:
-              response = requests.get('http://service-user.project.svc.cluster.local')
-              if response.status_code == 200:
-                  print("User service is reachable: ", response.text)
-              else:
-                  print(f"Failed with status code: {response.status_code}")
-          except Exception as e:
-              print(f"Error connecting to user service: {e}")
+          - |
+            pip install requests &&
+            python -c "
+            import requests;
+            try:
+                response = requests.get('http://service-user.project.svc.cluster.local');
+                if response.status_code == 200:
+                    print('User service reachable:', response.text)
+                else:
+                    print(f'Failed with status code: {response.status_code}')
+            except Exception as e:
+                print(f'Error connecting to user service: {e}')
+            "
         resources:
           limits:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "500m"
       restartPolicy: Never
   backoffLimit: 1
