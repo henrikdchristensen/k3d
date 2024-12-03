@@ -42,6 +42,19 @@ jobs:
         docker run -d --name yugabyte --network $K3D_NETWORK -p5433:5433 \
           yugabytedb/yugabyte:2.23.1.0-b220 bin/yugabyted start --background=false
 
+    # Install Istio
+    - name: Install Istio
+      run: |
+        curl -L https://istio.io/downloadIstio | sh -
+        ISTIO_DIR=$(find $PWD -type d -name "istio-*" -print -quit)
+        export PATH=$ISTIO_DIR/bin:$PATH
+        istioctl install --set profile=demo -y
+
+    # Label namespace for Istio injection
+    - name: Label Namespace for Istio Injection
+      run: |
+        kubectl label namespace project istio-injection=enabled
+
     # Build Docker images
     - name: Build Docker Images
       run: |
