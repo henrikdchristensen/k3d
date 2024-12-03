@@ -45,6 +45,8 @@ echo "Done waiting!"
 # Run database initialization script
 echo "Initializing database schema..."
 python ./src/database/create_tables.py
+echo "Populating database with fake data..."
+python ./src/database/fake_data.py
 
 # Deactivate virtual environment
 deactivate
