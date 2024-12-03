@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tests-job
+  namespace: project
+spec:
+  template:
+    spec:
+      containers:
+      - name: test-container
+        image: main-test:latest
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
+          limits:
+            memory: "256Mi"
+            cpu: "1"
+        volumeMounts:
+        - name: results
+          mountPath: /app
+      restartPolicy: Never
+      volumes:
+      - name: results
+        emptyDir: {}
+  backoffLimit: 1

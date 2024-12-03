@@ -31,7 +31,7 @@ jobs:
     - name: Create K3D Cluster
       run: |
         k3d cluster create my-cluster \
-          --agents 3 \
+          --agents 4 \
           --k3s-arg "--disable=traefik@server:0" \
           --port 80:80@loadbalancer --port 443:443@loadbalancer
 
@@ -64,6 +64,7 @@ jobs:
         docker build -t comp:latest ./src/services/competition
         docker build -t ctf:latest ./src/services/ctf
         docker build -t user:latest ./src/services/user
+        docker build -t main-test:latest ./src/main
     
     # Import Docker images into K3D
     - name: Import Docker Images into K3D
@@ -71,6 +72,7 @@ jobs:
         k3d image import comp:latest -c my-cluster
         k3d image import ctf:latest -c my-cluster
         k3d image import user:latest -c my-cluster
+        k3d image import main-test:latest -c my-cluster
     
     # Install Python and Pip
     - name: Install Python and Pip
@@ -92,24 +94,8 @@ jobs:
         kubectl get ingress -A
         kubectl get svc -A
     
-    # # Deploy a test job
-    # - name: Test Job
-    #   run: |
-    #     kubectl apply -f ./src/main/tests/test-job.yaml
-    #     kubectl wait --for=condition=complete job/test-comm -n project --timeout=60s
-    #     kubectl logs job/test-comm -n project
-        
-    # Run Tests
-    - name: Run Tests
+    # Deploy a test job
+    - name: Test Job
       run: |
-        pip install --no-cache-dir -r ./src/main/tests/requirements.txt
-        coverage run -m pytest ./src/main/tests -v -s
-        coverage report -m || echo "No coverage data for $service"
-
-    # Upload Test Results
-    - name: Upload Test Results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: test-results.xml
+        kubectl apply -f ./src/main/tests-job.yaml
+        kubectl logs job/tests-job -n project
