@@ -9,6 +9,11 @@ spec:
       containers:
       - name: test-container
         image: main-test:latest
+        command: ["pytest", "-v", "--durations=10", "--junitxml=/app/test-results.xml"]
+        args: ["/app/tests"]
+        volumeMounts:
+        - name: results
+          mountPath: /app
         resources:
           requests:
             memory: "128Mi"
@@ -16,9 +21,6 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "1"
-        volumeMounts:
-        - name: results
-          mountPath: /app
       restartPolicy: Never
       volumes:
       - name: results

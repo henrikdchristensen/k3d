@@ -98,4 +98,12 @@ jobs:
     - name: Test Job
       run: |
         kubectl apply -f ./src/main/tests-job.yaml
-        kubectl logs job/tests-job -n project
+        kubectl wait --for=condition=complete job/tests-job -n project --timeout=60s || true
+        kubectl logs job/tests-job -n project > test-logs.txt || echo "Failed to fetch logs"
+
+    # Upload logs as an artifact
+    - name: Upload Test Logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-logs
+        path: test-logs.txt
