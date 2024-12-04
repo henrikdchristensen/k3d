@@ -73,9 +73,9 @@ jobs:
     # Build Docker images
     - name: Build Docker Images
       run: |
-        docker build -t comp:latest ./src/services/competition
-        docker build -t ctf:latest ./src/services/ctf
-        docker build -t user:latest ./src/services/user
+        docker build --build-arg KUBERNETES_MODE=$KUBERNETES_MODE -t comp:latest ./src/services/competition
+        docker build --build-arg KUBERNETES_MODE=$KUBERNETES_MODE -t ctf:latest ./src/services/ctf
+        docker build --build-arg KUBERNETES_MODE=$KUBERNETES_MODE -t user:latest ./src/services/user
     
     # Import Docker images into K3D
     - name: Import Docker Images into K3D

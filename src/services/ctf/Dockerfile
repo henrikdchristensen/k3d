@@ -8,7 +8,8 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Environment variables
-ENV KUBERNETES_MODE=in-cluster
+ARG KUBERNETES_MODE=in-cluster
+ENV KUBERNETES_MODE=${KUBERNETES_MODE}
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONIOENCODING=UTF-8
 
