@@ -2,7 +2,7 @@
 
 # Variables
 CONTAINER_NAME="yugabyte"
-IMAGE_NAME="yugabytedb/yugabyte:latest"
+IMAGE_NAME="yugabytedb/yugabyte:2.23.1.0-b220"
 DATA_DIR="$HOME/yb_data"
 PORTS="-p7000:7000 -p9000:9000 -p15433:15433 -p5433:5433 -p9042:9042"
 
