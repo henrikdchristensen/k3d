@@ -29,7 +29,7 @@ jobs:
     # Create K3D cluster
     - name: Create K3D Cluster
       run: |
-        k3d cluster create my-cluster \
+        k3d cluster create ctf-cluster \
         --agents 3 \
         --k3s-arg "--disable=traefik@server:0" \
         --port 80:80@loadbalancer --port 443:443@loadbalancer
@@ -37,7 +37,7 @@ jobs:
     # Run YugabyteDB
     - name: Run YugabyteDB
       run: |
-        K3D_NETWORK=$(docker network ls | grep k3d-my-cluster | awk '{print $2}')
+        K3D_NETWORK=$(docker network ls | grep k3d-ctf-cluster | awk '{print $2}')
         docker run -d --name yugabyte --network $K3D_NETWORK -p5433:5433 \
           yugabytedb/yugabyte:2.23.1.0-b220 bin/yugabyted start --background=false
     
@@ -60,7 +60,7 @@ jobs:
     # Deploy Kubernetes manifests
     - name: Apply Kubernetes Manifests
       run: |
-        find ./src/kubernetes-k3d -name "*.yaml" -exec kubectl apply -f {} \;
+        find ./src/utils/k3d -name "*.yaml" -exec kubectl apply -f {} \;
     
     # Build Docker images
     - name: Build Docker Images
@@ -72,16 +72,16 @@ jobs:
     # Import Docker images into K3D
     - name: Import Docker Images into K3D
       run: |
-        k3d image import comp:latest -c my-cluster
-        k3d image import ctf:latest -c my-cluster
-        k3d image import user:latest -c my-cluster
+        k3d image import comp:latest -c ctf-cluster
+        k3d image import ctf:latest -c ctf-cluster
+        k3d image import user:latest -c ctf-cluster
       
     # Initialize Database with fake data
     - name: Initialize Database with fake data
       run: |
-        pip install --no-cache-dir -r ./src/database/requirements.txt
-        python ./src/database/create_tables.py
-        python ./src/database/fake_data.py
+        pip install --no-cache-dir -r ./src/utils/database/requirements.txt
+        python ./src/utils/database/create_tables.py
+        python ./src/utils/database/fake_data.py
     
     # Verify Deployment
     - name: Verify Deployment
