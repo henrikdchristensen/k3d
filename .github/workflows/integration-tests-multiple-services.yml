@@ -10,13 +10,19 @@ on:
 
 jobs:
   integration-test:
-    name: Integration Test
+    name: Integration Test Multiple Services
     runs-on: ubuntu-latest
 
     steps:
     # Checkout code
     - name: Checkout repository
       uses: actions/checkout@v3
+    
+    # Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
 
     # Install Docker and Kubernetes dependencies
     - name: Set up Docker and K3D
