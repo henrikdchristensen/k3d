@@ -16,28 +16,19 @@ def read_secret(secret_name):
 # to run locally, run docker compose up -d
 
 def connect():
-    #TODO_HC
     if os.getenv("KUBERNETES_MODE") == "in-cluster":
         conn = psycopg2.connect(
-            # Default to Yugabyte defaults
-            host="yugabyte",
+            host=read_secret("DB_HOST"),
             port="5433",
-            user="yugabyte",
+            database="yugabyte",
+            user=read_secret("DB_USER"),
+            password=read_secret("DB_PW"),
+            sslmode="verify-full",
+            sslrootcert="/var/secrets/db.crt",
             connect_timeout=10,
         )
-        # conn = psycopg2.connect(
-        #     host=read_secret("DB_HOST"),
-        #     port="5433",
-        #     database="yugabyte",
-        #     user=read_secret("DB_USER"),
-        #     password=read_secret("DB_PW"),
-        #     sslmode="verify-full",
-        #     sslrootcert="/var/secrets/db.crt",
-        #     connect_timeout=10,
-        # )
     else:
         conn = psycopg2.connect(
-            # Default to Yugabyte defaults
             host="yugabyte",
             port="5433",
             user="yugabyte",

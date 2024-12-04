@@ -27,12 +27,9 @@ def read_secret(secret_name):
         return f.readline()
 
 # config for jwt
-#TODO_HC:
 if mode == "in-cluster":
-    app.config['SECRET_KEY'] = 'y2Z2."1el=eo'
-    app.config["JWT_SECRET_KEY"] = '7P7f(fM8}!,)'
-    # app.config['SECRET_KEY'] = read_secret("JWT_SecretKey")
-    # app.config["JWT_SECRET_KEY"] = read_secret("JWT_JWTSecretKey")
+    app.config['SECRET_KEY'] = read_secret("JWT_SecretKey")
+    app.config["JWT_SECRET_KEY"] = read_secret("JWT_JWTSecretKey")
 else:
     app.config['SECRET_KEY'] = 'y2Z2."1el=eo'
     app.config["JWT_SECRET_KEY"] = '7P7f(fM8}!,)'
@@ -449,9 +446,9 @@ def get_challenge_competition(competition_id):
 
 
 if __name__ == "__main__":
-    # if mode == "in-cluster":
-    #     scheduler.init_app(app)
-    #     scheduler.start()
+    if mode == "in-cluster":
+        scheduler.init_app(app)
+        scheduler.start()
     serve(app, host='0.0.0.0', port=8081)
 
 

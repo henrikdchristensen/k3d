@@ -12,6 +12,8 @@ jobs:
   integration-test:
     name: Integration Test Multiple Services
     runs-on: ubuntu-latest
+    env:
+      KUBERNETES_MODE: "local" # overwrite Dockerfile ENV
 
     steps:
     # Checkout code

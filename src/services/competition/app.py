@@ -40,11 +40,8 @@ mode = os.getenv("KUBERNETES_MODE")
 
 # config for jwt
 if mode == "in-cluster":
-    #TODO_HC:
-    app.config['SECRET_KEY'] = 'y2Z2."1el=eo'
-    app.config["JWT_SECRET_KEY"] = '7P7f(fM8}!,)'
-    # app.config['SECRET_KEY'] = read_secret("JWT_SecretKey")
-    # app.config["JWT_SECRET_KEY"] = read_secret("JWT_JWTSecretKey")
+    app.config['SECRET_KEY'] = read_secret("JWT_SecretKey")
+    app.config["JWT_SECRET_KEY"] = read_secret("JWT_JWTSecretKey")
 else:
     app.config['SECRET_KEY'] = 'y2Z2."1el=eo'
     app.config["JWT_SECRET_KEY"] = '7P7f(fM8}!,)'

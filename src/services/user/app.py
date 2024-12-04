@@ -24,10 +24,10 @@ def read_secret(secret_name):
     with open(f"/var/secrets/{secret_name}.txt", "r") as f:
         return f.readline()
 
-#TODO_HC:
+# config for jwt
 if os.getenv("KUBERNETES_MODE") == "in-cluster":
-    app.config['SECRET_KEY'] = 'y2Z2."1el=eo'
-    app.config["JWT_SECRET_KEY"] = '7P7f(fM8}!,)'
+    app.config['SECRET_KEY'] = read_secret("JWT_SecretKey")
+    app.config["JWT_SECRET_KEY"] = read_secret("JWT_JWTSecretKey")
 else:
     app.config['SECRET_KEY'] = 'y2Z2."1el=eo'
     app.config["JWT_SECRET_KEY"] = '7P7f(fM8}!,)'
@@ -37,10 +37,6 @@ app.config['JWT_TOKEN_LOCATION'] = ['headers']
 # JWT Initialization
 jwt = JWTManager(app)
 
-
-@app.route("/user", methods=["GET"])
-def user_endpoint():
-    return "User service is working", 200
 
 @app.get("/")
 def hello_world():
