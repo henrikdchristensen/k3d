@@ -5,7 +5,7 @@ set -e
 
 # Install K3D
 echo "Installing K3D..."
-curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=v5.7.5 bash
 
 # Create K3D Cluster without Traefik
 echo "Create K3D Cluster..."
@@ -51,7 +51,7 @@ kubectl config set-context --current --namespace=project
 
 # Install Istio
 echo "Install Istio..."
-curl -L https://istio.io/downloadIstio | sh -
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.24.1 sh -
 ISTIO_DIR=$(find $PWD -type d -name "istio-*" -print -quit)
 export PATH=$ISTIO_DIR/bin:$PATH
 istioctl install --set profile=default -y

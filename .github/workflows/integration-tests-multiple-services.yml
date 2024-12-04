@@ -13,7 +13,7 @@ jobs:
     name: Integration Test Multiple Services
     runs-on: ubuntu-latest
     env:
-      KUBERNETES_MODE: "local" # overwrite Dockerfile ENV
+      KUB_MODE: local # overwrite Dockerfile ENV
 
     steps:
     # Checkout code
@@ -30,7 +30,7 @@ jobs:
     - name: Set up Docker and K3D
       run: |
         sudo apt-get update
-        curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+        curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=v5.7.5 bash
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
@@ -59,7 +59,7 @@ jobs:
     # Install Istio
     - name: Install Istio
       run: |
-        curl -L https://istio.io/downloadIstio | sh -
+        curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.24.1 sh -
         ISTIO_DIR=$(find $PWD -type d -name "istio-*" -print -quit)
         export PATH=$ISTIO_DIR/bin:$PATH
         istioctl install --set profile=default -y
@@ -73,9 +73,9 @@ jobs:
     # Build Docker images
     - name: Build Docker Images
       run: |
-        docker build --build-arg KUBERNETES_MODE=$KUBERNETES_MODE -t comp:latest ./src/services/competition
-        docker build --build-arg KUBERNETES_MODE=$KUBERNETES_MODE -t ctf:latest ./src/services/ctf
-        docker build --build-arg KUBERNETES_MODE=$KUBERNETES_MODE -t user:latest ./src/services/user
+        docker build --build-arg KUBERNETES_MODE=$KUB_MODE -t comp:latest ./src/services/competition
+        docker build --build-arg KUBERNETES_MODE=$KUB_MODE -t ctf:latest ./src/services/ctf
+        docker build --build-arg KUBERNETES_MODE=$KUB_MODE -t user:latest ./src/services/user
     
     # Import Docker images into K3D
     - name: Import Docker Images into K3D
